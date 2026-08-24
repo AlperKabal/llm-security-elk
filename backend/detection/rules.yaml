@@ -1,0 +1,111 @@
+rules:
+
+  # LLM01:2026 - Prompt Injection
+  - id: LLM01-001
+    name: "Instruction Override Attempt"
+    category: "LLM01_Prompt_Injection"
+    pattern: "(?i)(ignore|disregard|forget)\\s+(previous|above|all)\\s+(instructions?|rules?)"
+    severity: "high"
+    target: "prompt"
+    description: "User is attempting to make the LLM ignore its previous instructions"
+
+  - id: LLM01-002
+    name: "Role Manipulation Attempt"
+    category: "LLM01_Prompt_Injection"
+    pattern: "(?i)(you are now|act as|pretend to be|new persona)"
+    severity: "medium"
+    target: "prompt"
+    description: "User is attempting to change the model's role or identity"
+
+  - id: LLM01-003
+    name: "Jailbreak Keyword"
+    category: "LLM01_Prompt_Injection"
+    pattern: "(?i)\\b(DAN|Do Anything Now|jailbreak|developer mode|no restrictions)\\b"
+    severity: "high"
+    target: "prompt"
+    description: "Known jailbreak keywords detected"
+
+  - id: LLM01-004
+    name: "Hypothetical/Fictional Framing Bypass"
+    category: "LLM01_Prompt_Injection"
+    pattern: "(?i)(hypothetically|in a fictional world|imagine you (have no|are not))"
+    severity: "medium"
+    target: "prompt"
+    description: "User is attempting to bypass restrictions using a hypothetical/fictional scenario"
+
+  # LLM02:2026 - Sensitive Information Disclosure
+  - id: LLM02-001
+    name: "API Key Leak"
+    category: "LLM02_Sensitive_Info_Disclosure"
+    pattern: "(?i)(api[_-]?key|secret[_-]?key)\\s*[:=]\\s*['\"]?[\\w-]{16,}"
+    severity: "critical"
+    target: "response"
+    description: "Possible API key leak detected in the response"
+
+  - id: LLM02-002
+    name: "Private Key Leak"
+    category: "LLM02_Sensitive_Info_Disclosure"
+    pattern: "-{3,6}BEGIN (RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY-{3,6}"
+    severity: "critical"
+    target: "response"
+    description: "Private key detected in the response"
+
+  - id: LLM02-003
+    name: "Email Address Leak"
+    category: "LLM02_Sensitive_Info_Disclosure"
+    pattern: "[\\w.+-]+@[\\w-]+\\.[\\w.-]+"
+    severity: "medium"
+    target: "response"
+    description: "Email address detected in the response"
+
+
+  # LLM06:2026 - Unbounded Consumption
+  - id: LLM06-001
+    name: "Resource Exhaustion Attempt via Repetition"
+    category: "LLM06_Unbounded_Consumption"
+    pattern: "(?i)(repeat|say)\\s+.{0,50}\\b(forever|infinite|1000000|many times)\\b"
+    severity: "medium"
+    target: "prompt"
+    description: "User is attempting to force excessive resource consumption from the model"
+
+  # LLM08:2026 - Hidden Context Exposure
+  - id: LLM08-001
+    name: "System Prompt Extraction Attempt"
+    category: "LLM08_Hidden_Context_Exposure"
+    pattern: "(?i)(reveal|show|print|output|repeat)\\s+.{0,50}(system prompt|instructions|initial prompt)"
+    severity: "high"
+    target: "prompt"
+    description: "User is attempting to extract the system prompt or hidden context"
+
+  # LLM10:2026 - Improper Output Handling
+  - id: LLM10-001
+    name: "Script Tag in Output"
+    category: "LLM10_Improper_Output_Handling"
+    pattern: "<script.*?>"
+    severity: "critical"
+    target: "response"
+    description: "Script tag detected in the response"
+
+  - id: LLM10-002
+    name: "SQL Command in Output"
+    category: "LLM10_Improper_Output_Handling"
+    pattern: "(?i)\\b(DROP TABLE|DELETE FROM|UNION SELECT)\\b"
+    severity: "critical"
+    target: "response"
+    description: "Dangerous SQL command detected in the response"
+
+  - id: LLM10-003
+    name: "Shell Command in Output"
+    category: "LLM10_Improper_Output_Handling"
+    pattern: "(?i)(rm\\s+-rf|;\\s*curl|;\\s*wget|&&\\s*rm)"
+    severity: "critical"
+    target: "response"
+    description: "Dangerous shell command detected in the response"
+
+  - id: LLM10-004
+    name: "Windows Destructive Command in Output"
+    category: "LLM10_Improper_Output_Handling"
+    pattern: "(?i)(del\\s+/[fsq]|rmdir\\s+/[sq]|Remove-Item\\s+.{0,30}-Recurse|format\\s+[a-z]:)"
+    severity: "critical"
+    target: "response"
+    description: "Dangerous Windows/PowerShell destructive command detected in the response"
