@@ -4,7 +4,7 @@ rules:
   - id: LLM01-001
     name: "Instruction Override Attempt"
     category: "LLM01_Prompt_Injection"
-    pattern: "(?i)(ignore|disregard|forget)\\s+(previous|above|all)\\s+(instructions?|rules?)"
+    pattern: "(?i)(ignore|disregard|forget)\\s+.{0,25}\\s*(instructions?|rules?)"
     severity: "high"
     target: "prompt"
     description: "User is attempting to make the LLM ignore its previous instructions"
