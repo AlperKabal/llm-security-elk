@@ -26,6 +26,30 @@ services:
       - elasticsearch
     networks:
       - elk-network
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.0
+    container_name: logstash
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    ports:
+      - "5044:5044"
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk-network
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.15.0
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ../backend/logs:/logs:ro
+    command: filebeat -e -strict.perms=false
+    depends_on:
+      - logstash
+    networks:
+      - elk-network
 
 volumes:
   esdata:

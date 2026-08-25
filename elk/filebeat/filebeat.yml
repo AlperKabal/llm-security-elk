@@ -1,0 +1,12 @@
+filebeat.inputs:
+  - type: filestream
+    id: llm-logs
+    paths:
+      - /logs/*.log
+    parsers:
+      - ndjson:
+          target: ""
+          add_error_key: true
+
+output.logstash:
+  hosts: ["logstash:5044"]
