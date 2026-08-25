@@ -23,7 +23,7 @@ def calculate_overall_severity(prompt_detection, response_detection):
 def log_interaction(user_id, session_id, prompt, response, prompt_detection, response_detection, blocked, blocked_at):
     overall_severity = calculate_overall_severity(prompt_detection, response_detection)
     log_entry = {
-        "@timestamp": datetime.now(timezone.utc).isoformat(),
+        "event_timestamp": datetime.now(timezone.utc).isoformat(),
         "user_id": user_id,
         "session_id": session_id,
         "prompt": prompt,
