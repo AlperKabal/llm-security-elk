@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import requests
 from detection.detect import detect_prompt, detect_response
 from logger import log_interaction
+from detection.behavioral import run_behavioral_checks
 
 
 app = FastAPI()
@@ -47,6 +48,7 @@ def post_message(request: ChatRequest):
     prompt = request.prompt
 
     prompt_detection = detect_prompt(prompt)
+    behavioral_result = run_behavioral_checks(user_id, prompt)
     blocked_at = None
     if severityCheck(prompt_detection):
         final_response = "Something went wrong. Please try again."
@@ -65,7 +67,7 @@ def post_message(request: ChatRequest):
             final_response = response
             blocked = False
 
-    log_interaction(user_id,session_id,prompt,response,prompt_detection,response_detection,blocked,blocked_at)
+    log_interaction(user_id,session_id,prompt,response,prompt_detection,response_detection,behavioral_result,blocked,blocked_at)
 
     return {"response": final_response}
     

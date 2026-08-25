@@ -20,7 +20,7 @@ def calculate_overall_severity(prompt_detection, response_detection):
                 max_rule = rule
     return max_rule["severity"]
 
-def log_interaction(user_id, session_id, prompt, response, prompt_detection, response_detection, blocked, blocked_at):
+def log_interaction(user_id, session_id, prompt, response, prompt_detection, response_detection,behavioral_result, blocked, blocked_at):
     overall_severity = calculate_overall_severity(prompt_detection, response_detection)
     log_entry = {
         "event_timestamp": datetime.now(timezone.utc).isoformat(),
@@ -33,6 +33,7 @@ def log_interaction(user_id, session_id, prompt, response, prompt_detection, res
         "detection": {
             "prompt_detection": prompt_detection,
             "response_detection": response_detection,
+            "behavioral_detection": behavioral_result
         },
         "overall_severity": overall_severity,
     }
