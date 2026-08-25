@@ -54,7 +54,7 @@ rules:
     name: "Email Address Leak"
     category: "LLM02_Sensitive_Info_Disclosure"
     pattern: "[\\w.+-]+@[\\w-]+\\.[\\w.-]+"
-    severity: "medium"
+    severity: "low"
     target: "response"
     description: "Email address detected in the response"
 
