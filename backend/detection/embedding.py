@@ -49,7 +49,7 @@ def check_semantic_similarity(prompt):
         best_match_text = None
 
     return {
-        "flagged": best_score >= SIMILARITY_THRESHOLD,
+        "flagged": bool(best_score >= SIMILARITY_THRESHOLD),
         "similarity_score": round(float(best_score), 3),
         "closest_match_text": best_match_text,
     }
