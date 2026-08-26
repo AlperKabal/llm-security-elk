@@ -20,7 +20,7 @@ rules:
   - id: LLM01-003
     name: "Jailbreak Keyword"
     category: "LLM01_Prompt_Injection"
-    pattern: "(?i)\\b(DAN|Do Anything Now|jailbreak|developer mode|no restrictions)\\b"
+    pattern: "(?i)\\b(DAN|Do Anything Now|AIM|STAN|DUDE|Always Intelligent and Machiavellian|Strive To Avoid Norms|jailbreak|developer mode|no restrictions)\\b"
     severity: "high"
     target: "prompt"
     description: "Known jailbreak keywords detected"
