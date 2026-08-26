@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
@@ -55,10 +55,15 @@ def askOllama(prompt):
 
 
 @app.post("/chat")
-def post_message(request: ChatRequest):
+def post_message(request: ChatRequest, req: Request):
     user_id = request.user_id
     session_id = request.session_id
     prompt = request.prompt
+
+    source_ip = req.client.host
+    source_port = req.client.port
+    destination_ip = req.url.hostname
+    destination_ip, destination_port = req.scope["server"]
 
     prompt_detection = detect_prompt(prompt)
     behavioral_result = run_behavioral_checks(user_id, prompt)
@@ -86,7 +91,7 @@ def post_message(request: ChatRequest):
             final_response = response
             blocked = False
 
-    log_interaction(user_id,session_id,prompt,response,final_response,prompt_detection,response_detection,behavioral_result,blocked,blocked_at)
+    log_interaction(user_id,session_id,prompt,response,final_response,prompt_detection,response_detection,behavioral_result,blocked,blocked_at,source_ip, source_port, destination_ip, destination_port)
 
     return {"response": final_response}
     

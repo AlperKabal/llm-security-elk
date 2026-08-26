@@ -39,12 +39,18 @@ def calculate_overall_severity(prompt_detection, response_detection, behavioral_
 
     return overall_severity
 
-def log_interaction(user_id, session_id, prompt, response,final_response, prompt_detection, response_detection,behavioral_result, blocked, blocked_at):
+def log_interaction(user_id, session_id, prompt, response,final_response, prompt_detection, response_detection,behavioral_result, blocked, blocked_at,source_ip, source_port, destination_ip, destination_port):
     overall_severity = calculate_overall_severity(prompt_detection, response_detection, behavioral_result)
     log_entry = {
         "event_timestamp": datetime.now(timezone.utc).isoformat(),
         "user_id": user_id,
         "session_id": session_id,
+        "network": {
+            "source_ip": source_ip,
+            "source_port": source_port,
+            "destination_ip": destination_ip,
+            "destination_port": destination_port,
+        },
         "prompt": prompt,
         "response": response,
         "final_response": final_response,
