@@ -7,6 +7,15 @@ LOG_FILE_PATH = os.path.join(os.path.dirname(__file__), "logs", "llm_interaction
 SEVERITY_ORDER = {"none": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
 BEHAVIORAL_SEVERITY_MAP = {"rate_anomaly": "medium", "length_anomaly": "low", "repetition_anomaly": "high",}
 
+def get_embedding_severity(semantic_match):
+    score = semantic_match["similarity_score"]
+    if score >= 0.75:
+        return "critical"
+    elif score >= 0.70:
+        return "high"
+    else:
+        return "none"
+
 def get_Highest_Behavioral_Anomaly(behavioral_result):
     highest_severity = "none"
     highest_anomaly = None
@@ -17,10 +26,12 @@ def get_Highest_Behavioral_Anomaly(behavioral_result):
     return highest_anomaly
 
 
-def calculate_overall_severity(prompt_detection, response_detection, behavioral_result):
+def calculate_overall_severity(prompt_detection, response_detection, behavioral_result, semantic_match):
     all_rules = prompt_detection["triggered_rules"] + response_detection["triggered_rules"]
         
     overall_severity = "none"
+    overall_severity_source = "none"
+
     if all_rules:
         max_rule = None
         for rule in all_rules:
@@ -30,17 +41,22 @@ def calculate_overall_severity(prompt_detection, response_detection, behavioral_
                 if SEVERITY_ORDER[max_rule["severity"]] < SEVERITY_ORDER[rule["severity"]]:
                     max_rule = rule
         overall_severity = max_rule["severity"]
+        overall_severity_source = f"rulebook:{max_rule['rule_id']}"
     
     highest_behavioral_anomaly = get_Highest_Behavioral_Anomaly(behavioral_result)
     if highest_behavioral_anomaly:
         for (anomaly, _) in highest_behavioral_anomaly.items():
             if SEVERITY_ORDER[BEHAVIORAL_SEVERITY_MAP[anomaly]] > SEVERITY_ORDER[overall_severity]:
                 overall_severity = BEHAVIORAL_SEVERITY_MAP[anomaly]
+                overall_severity_source = f"behavioral:{anomaly}"
+    embedding_severity = get_embedding_severity(semantic_match)
+    if SEVERITY_ORDER[embedding_severity] > SEVERITY_ORDER[overall_severity]:
+        overall_severity = embedding_severity
+        overall_severity_source = "embedding"
+    return overall_severity, overall_severity_source
 
-    return overall_severity
-
-def log_interaction(user_id, session_id, prompt, response,final_response, prompt_detection, response_detection,behavioral_result, blocked, blocked_at,source_ip, source_port, destination_ip, destination_port):
-    overall_severity = calculate_overall_severity(prompt_detection, response_detection, behavioral_result)
+def log_interaction(user_id, session_id, prompt, response,final_response, prompt_detection, response_detection,behavioral_result,semantic_match, blocked, blocked_at,source_ip, source_port, destination_ip, destination_port):
+    overall_severity, overall_severity_source = calculate_overall_severity(prompt_detection, response_detection, behavioral_result,semantic_match)
     log_entry = {
         "event_timestamp": datetime.now(timezone.utc).isoformat(),
         "user_id": user_id,
@@ -59,9 +75,11 @@ def log_interaction(user_id, session_id, prompt, response,final_response, prompt
         "detection": {
             "prompt_detection": prompt_detection,
             "response_detection": response_detection,
-            "behavioral_detection": behavioral_result
+            "behavioral_detection": behavioral_result,
+            "semantic_match": semantic_match,
         },
         "overall_severity": overall_severity,
+        "overall_severity_source": overall_severity_source,
     }
     try:
         with open(LOG_FILE_PATH, "a", encoding="utf-8") as f:

@@ -5,6 +5,7 @@ import requests
 from detection.detect import detect_prompt, detect_response
 from logger import log_interaction, get_Highest_Behavioral_Anomaly
 from detection.behavioral import run_behavioral_checks
+from detection.embedding import check_semantic_similarity
 
 
 app = FastAPI()
@@ -62,11 +63,12 @@ def post_message(request: ChatRequest, req: Request):
 
     source_ip = req.client.host
     source_port = req.client.port
-    destination_ip = req.url.hostname
     destination_ip, destination_port = req.scope["server"]
 
     prompt_detection = detect_prompt(prompt)
     behavioral_result = run_behavioral_checks(user_id, prompt)
+    semantic_match = check_semantic_similarity(prompt)
+
     blocked_at = None
     if severityCheck(prompt_detection):
         final_response = "Something went wrong. Please try again."
@@ -80,6 +82,12 @@ def post_message(request: ChatRequest, req: Request):
         blocked_at = "behavioral_stage"
         response = None
         response_detection = {"triggered_rules": [], "rule_count": 0}
+    elif semantic_match["similarity_score"] >= 0.75:
+        final_response = "Something went wrong. Please try again."
+        blocked = True
+        blocked_at = "embedding_stage"
+        response = None
+        response_detection = {"triggered_rules": [], "rule_count": 0}
     else:
         response = askOllama(prompt)
         response_detection = detect_response(response)
@@ -91,7 +99,7 @@ def post_message(request: ChatRequest, req: Request):
             final_response = response
             blocked = False
 
-    log_interaction(user_id,session_id,prompt,response,final_response,prompt_detection,response_detection,behavioral_result,blocked,blocked_at,source_ip, source_port, destination_ip, destination_port)
+    log_interaction(user_id,session_id,prompt,response,final_response,prompt_detection,response_detection,behavioral_result,semantic_match,blocked,blocked_at,source_ip, source_port, destination_ip, destination_port)
 
     return {"response": final_response}
     
