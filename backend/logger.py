@@ -11,8 +11,10 @@ def get_embedding_severity(semantic_match):
     score = semantic_match["similarity_score"]
     if score >= 0.75:
         return "critical"
-    elif score >= 0.70:
+    elif score >= 0.72:
         return "high"
+    elif score >= 0.7:
+        return "medium"
     else:
         return "none"
 
