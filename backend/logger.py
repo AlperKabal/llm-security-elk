@@ -7,6 +7,21 @@ LOG_FILE_PATH = os.path.join(os.path.dirname(__file__), "logs", "llm_interaction
 SEVERITY_ORDER = {"none": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
 BEHAVIORAL_SEVERITY_MAP = {"rate_anomaly": "medium", "length_anomaly": "low", "repetition_anomaly": "high",}
 
+def collect_triggered_owasp_categories(prompt_detection, response_detection, behavioral_result, semantic_match):
+    categories = set()
+
+    for rule in prompt_detection["triggered_rules"] + response_detection["triggered_rules"]:
+        categories.add(rule["category"])
+
+    for anomaly, result in behavioral_result.items():
+        if result["owasp_category"]:
+            categories.add(result["owasp_category"])
+
+    if semantic_match["owasp_category"]:
+        categories.add(semantic_match["owasp_category"])
+
+    return list(categories)
+
 def get_embedding_severity(semantic_match):
     score = semantic_match["similarity_score"]
     if score >= 0.75:
@@ -59,6 +74,7 @@ def calculate_overall_severity(prompt_detection, response_detection, behavioral_
 
 def log_interaction(user_id, session_id, prompt, response,final_response, prompt_detection, response_detection,behavioral_result,semantic_match, blocked, blocked_at,source_ip, source_port, destination_ip, destination_port):
     overall_severity, overall_severity_source = calculate_overall_severity(prompt_detection, response_detection, behavioral_result,semantic_match)
+    triggered_owasp_categories = collect_triggered_owasp_categories(prompt_detection, response_detection, behavioral_result, semantic_match)
     log_entry = {
         "event_timestamp": datetime.now(timezone.utc).isoformat(),
         "user_id": user_id,
@@ -80,6 +96,7 @@ def log_interaction(user_id, session_id, prompt, response,final_response, prompt
             "behavioral_detection": behavioral_result,
             "semantic_match": semantic_match,
         },
+        "triggered_owasp_categories": triggered_owasp_categories,
         "overall_severity": overall_severity,
         "overall_severity_source": overall_severity_source,
     }
