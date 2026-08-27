@@ -43,13 +43,18 @@ def check_semantic_similarity(prompt):
             best_match_index = index
         index += 1
 
+    flagged = bool(best_score >= SIMILARITY_THRESHOLD)
+
     if best_match_index >= 0:
-        best_match_text = KNOWN_JAILBREAKS[best_match_index]
+        best_match_text = KNOWN_JAILBREAKS[best_match_index]["text"]
+        best_match_category = KNOWN_JAILBREAKS[best_match_index]["category"] if flagged else None
     else:
         best_match_text = None
+        best_match_category = None
 
     return {
-        "flagged": bool(best_score >= SIMILARITY_THRESHOLD),
+        "flagged": flagged,
         "similarity_score": round(float(best_score), 3),
         "closest_match_text": best_match_text,
+        "owasp_category": best_match_category,
     }

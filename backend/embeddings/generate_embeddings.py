@@ -9,8 +9,10 @@ def generate_and_save_embeddings():
     print("Model yükleniyor...")
     model = SentenceTransformer('BAAI/bge-base-en-v1.5')
 
-    print(f"{len(KNOWN_JAILBREAKS)} prompt embedding'e çevriliyor...")
-    embeddings = model.encode(KNOWN_JAILBREAKS)
+    texts = [item["text"] for item in KNOWN_JAILBREAKS]
+
+    print(f"{len(texts)} prompt embedding'e çevriliyor...")
+    embeddings = model.encode(texts)
 
     output_path = os.path.join(os.path.dirname(__file__), "jailbreak_embeddings.npy")
     np.save(output_path, embeddings)
