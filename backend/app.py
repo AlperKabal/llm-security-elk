@@ -82,7 +82,7 @@ def post_message(request: ChatRequest, req: Request):
         blocked_at = "behavioral_stage"
         response = None
         response_detection = {"triggered_rules": [], "rule_count": 0}
-    elif semantic_match["similarity_score"] >= 0.75:
+    elif semantic_match["similarity_score"] >= 0.72:
         final_response = "Something went wrong. Please try again."
         blocked = True
         blocked_at = "embedding_stage"

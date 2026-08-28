@@ -42,6 +42,14 @@ rules:
     target: "response"
     description: "Possible API key leak detected in the response"
 
+  - id: LLM01-005
+    name: "Response Contains Instruction Override Language"
+    category: "LLM01_Prompt_Injection"
+    pattern: "(?i)(ignore|disregard)\\s+.{0,25}\\s*(instructions?|rules?)"
+    severity: "high"
+    target: "response"
+    description: "The model's own response contains instruction-override language, suggesting a successful prompt injection"
+
   - id: LLM02-002
     name: "Private Key Leak"
     category: "LLM02_Sensitive_Info_Disclosure"
