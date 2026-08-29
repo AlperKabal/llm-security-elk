@@ -154,11 +154,11 @@ def run_triage_batch():
         escalated = update_log_with_review(doc_id, index, current_severity, review)
 
         print(f"\n--- {doc_id} ---")
-        print(f"Prompt: {source.get('prompt', '')[:80]}")
+        print(f"Prompt: {source.get('prompt', '')}")
         print(f"Current severity: {current_severity} -> Recommended: {review.get('recommended_severity')}")
         print(f"Escalated: {escalated} | Reason: {review.get('reason')}")
 
-def run_triage_loop(interval_seconds=300):
+def run_triage_loop(interval_seconds=180):
 
     while True:
         print(f"\n=== Triage batch başlıyor: {time.strftime('%Y-%m-%d %H:%M:%S')} ===")
@@ -167,4 +167,4 @@ def run_triage_loop(interval_seconds=300):
         time.sleep(interval_seconds)
 
 if __name__ == "__main__":
-    run_triage_loop(interval_seconds=300)
+    run_triage_loop(interval_seconds=180)
