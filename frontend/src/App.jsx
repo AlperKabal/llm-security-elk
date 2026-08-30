@@ -86,7 +86,7 @@ function App() {
           role: "assistant",
           content: data.final_response,
           blocked: data.blocked,
-          created_at: new Date().toISOString(),
+          created_at: data.event_time,
         },
       ]);
 

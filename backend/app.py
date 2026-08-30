@@ -6,6 +6,9 @@ from detection.detect import detect_prompt, detect_response
 from logger import log_interaction, get_Highest_Behavioral_Anomaly
 from detection.behavioral import run_behavioral_checks
 from detection.embedding import check_semantic_similarity
+from db import init_db,get_all_users,create_user,get_user_chats,create_chat,get_chat_messages,save_message,delete_chat
+from typing import Optional
+from datetime import datetime, timezone
 
 
 app = FastAPI()
@@ -22,10 +25,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class ChatRequest(BaseModel):
-    user_id: str
-    session_id: str
-    prompt: str
+init_db()
+
+
 
 BEHAVIORAL_MESSAGES = {
     "repetition_anomaly": "You seem to be repeating the same request. Please rephrase or wait a moment before trying again.",
@@ -54,16 +56,59 @@ def askOllama(prompt):
     })
     return response.json()["response"]
 
+@app.get("/users")
+def list_users():
+    return get_all_users()
+
+
+class AddUserRequest(BaseModel):
+    user_id: str
+
+
+@app.post("/users")
+def add_user(request: AddUserRequest):
+    created = create_user(request.user_id)
+    if not created:
+        return {"error": "User already exists"}, 409
+    return {"user_id": request.user_id}
+
+@app.get("/chats")
+def list_chats(user_id: str):
+    return get_user_chats(user_id)
+
+
+@app.get("/chats/{chat_id}")
+def get_chat(chat_id: str):
+    return get_chat_messages(chat_id)
+
+
+@app.delete("/chats/{chat_id}")
+def remove_chat(chat_id: str):
+    delete_chat(chat_id)
+    return {"status": "deleted"}
+
+
+class ChatRequest(BaseModel):
+    user_id: str
+    session_id: str
+    chat_id: Optional[str] = None
+    prompt: str
 
 @app.post("/chat")
 def post_message(request: ChatRequest, req: Request):
+    prompt_received_at = datetime.now(timezone.utc)
     user_id = request.user_id
     session_id = request.session_id
+    chat_id = request.chat_id
     prompt = request.prompt
 
     source_ip = req.client.host
     source_port = req.client.port
     destination_ip, destination_port = req.scope["server"]
+
+    if chat_id is None:
+        title = prompt[:50]
+        chat_id = create_chat(user_id, title)
 
     prompt_detection = detect_prompt(prompt)
     behavioral_result = run_behavioral_checks(user_id, prompt)
@@ -99,9 +144,13 @@ def post_message(request: ChatRequest, req: Request):
             final_response = response
             blocked = False
 
-    log_interaction(user_id,session_id,prompt,response,final_response,prompt_detection,response_detection,behavioral_result,semantic_match,blocked,blocked_at,source_ip, source_port, destination_ip, destination_port)
+    event_time = datetime.now(timezone.utc)
+    log_interaction(event_time,prompt_received_at, user_id,session_id,chat_id,prompt,response,final_response,prompt_detection,response_detection,behavioral_result,semantic_match,blocked,blocked_at,source_ip, source_port, destination_ip, destination_port)
 
-    return {"response": final_response}
+    save_message(chat_id, "user", user_id, prompt, False, prompt_received_at)
+    save_message(chat_id, "assistant", "assistant", final_response, blocked,event_time)
+
+    return {"final_response": final_response, "blocked": blocked, "chat_id": chat_id, "event_time": event_time.isoformat()}
     
 
     
