@@ -78,14 +78,16 @@ def calculate_overall_severity(prompt_detection, response_detection, behavioral_
         overall_severity_source = "embedding"
     return overall_severity, overall_severity_source
 
-def log_interaction(user_id, session_id, prompt, response,final_response, prompt_detection, response_detection,behavioral_result,semantic_match, blocked, blocked_at,source_ip, source_port, destination_ip, destination_port):
+def log_interaction(event_time,prompt_received_at,user_id, session_id,chat_id,prompt, response,final_response, prompt_detection, response_detection,behavioral_result,semantic_match, blocked, blocked_at,source_ip, source_port, destination_ip, destination_port):
     overall_severity, overall_severity_source = calculate_overall_severity(prompt_detection, response_detection, behavioral_result,semantic_match)
     triggered_rule_ids = collect_triggered_rule_ids(prompt_detection, response_detection)
     triggered_owasp_categories = collect_triggered_owasp_categories(prompt_detection, response_detection, behavioral_result, semantic_match)
     log_entry = {
-        "event_timestamp": datetime.now(timezone.utc).isoformat(),
+        "event_timestamp": event_time.isoformat(),
+        "prompt_received_at": prompt_received_at.isoformat(),
         "user_id": user_id,
         "session_id": session_id,
+        "chat_id": chat_id,
         "network": {
             "source_ip": source_ip,
             "source_port": source_port,
