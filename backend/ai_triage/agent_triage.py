@@ -92,7 +92,7 @@ def build_review_prompt(log_source, rules_context):
     - Never recommend a LOWER severity than the current one; if you believe the current severity is too high, just recommend the same value.
 
     Respond ONLY with valid JSON in this exact format, no other text:
-    {{"recommended_severity": "none" or "low" or "medium" or "high" or "critical", "reason": "short, specific explanation grounded in the categories above"}}
+    {{"recommended_severity": "none" or "low" or "medium" or "high" or "critical", "matched_rule_id": "the rule id this most closely relates to, or null if none apply", "reason": "short, specific explanation grounded in the categories above"}}
     """
     return review_prompt
 
@@ -118,6 +118,7 @@ def is_severity_escalated(current_severity, recommended_severity):
 def update_log_with_review(doc_id, index, current_severity, review_result):
    
     recommended_severity = review_result.get("recommended_severity")
+    matched_rule_id = review_result.get("matched_rule_id")
     escalated = is_severity_escalated(current_severity, recommended_severity)
 
     es.update(
@@ -129,6 +130,7 @@ def update_log_with_review(doc_id, index, current_severity, review_result):
                     "reviewed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                     "severity_before_ai_review": current_severity,
                     "recommended_severity": recommended_severity,
+                    "matched_rule_id": matched_rule_id,
                     "severity_escalated": escalated,
                     "reason": review_result.get("reason"),
                 }
