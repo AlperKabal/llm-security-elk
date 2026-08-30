@@ -8,5 +8,6 @@ venv/
 env/
 #Test Files
 test_*
-
+logs/
 .env
+llm_interactions*
