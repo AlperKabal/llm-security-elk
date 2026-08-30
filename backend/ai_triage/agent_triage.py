@@ -104,6 +104,7 @@ def ai_review_log(log_source, rules_context):
         "model": "qwen3:8b",
         "prompt": review_prompt,
         "stream": False,
+        "format": "json"
     })
 
     raw_output = response.json()["response"]
