@@ -39,7 +39,6 @@ def init_db():
     conn.close()
     print("Db Success")
 
-# db.py'nin sonuna eklenecek
 
 def get_all_users():
     conn = get_connection()
@@ -58,7 +57,7 @@ def create_user(user_id):
     if cur.fetchone():
         cur.close()
         conn.close()
-        return False  # zaten var
+        return False 
 
     cur.execute("INSERT INTO users (id) VALUES (%s);", (user_id,))
     conn.commit()
