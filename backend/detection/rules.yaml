@@ -33,15 +33,6 @@ rules:
     target: "prompt"
     description: "User is attempting to bypass restrictions using a hypothetical/fictional scenario"
 
-  # LLM02:2026 - Sensitive Information Disclosure
-  - id: LLM02-001
-    name: "API Key Leak"
-    category: "LLM02_Sensitive_Info_Disclosure"
-    pattern: "(?i)(api[_-]?key|secret[_-]?key)\\s*[:=]\\s*['\"]?[\\w-]{16,}"
-    severity: "critical"
-    target: "response"
-    description: "Possible API key leak detected in the response"
-
   - id: LLM01-005
     name: "Response Contains Instruction Override Language"
     category: "LLM01_Prompt_Injection"
@@ -49,6 +40,15 @@ rules:
     severity: "high"
     target: "response"
     description: "The model's own response contains instruction-override language, suggesting a successful prompt injection"
+
+  # LLM02:2026 - Sensitive Information Disclosure
+  - id: LLM02-001
+    name: "API Key Leak"
+    category: "LLM02_Sensitive_Info_Disclosure"
+    pattern: "(?i)(api[_ -]?key|secret[_ -]?key)\\s*(is|as|:|=)\\s*:?\\s*['\"]?[\\w-]{16,}"
+    severity: "critical"
+    target: "response"
+    description: "Possible API key leak detected in the response"
 
   - id: LLM02-002
     name: "Private Key Leak"
