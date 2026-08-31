@@ -6,7 +6,7 @@ from detection.detect import detect_prompt, detect_response
 from logger import log_interaction, get_Highest_Behavioral_Anomaly
 from detection.behavioral import run_behavioral_checks
 from detection.embedding import check_semantic_similarity
-from db import init_db,get_all_users,create_user,get_user_chats,create_chat,get_chat_messages,save_message,delete_chat
+from db import init_db,get_all_users,create_user,get_user_chats,create_chat,get_chat_messages,save_message,delete_chat,get_recent_messages
 from typing import Optional
 from datetime import datetime, timezone
 
@@ -47,6 +47,22 @@ def severityCheck(detection_result):
         if rule["severity"] in {"high", "critical"}:
             return True
     return False
+
+def build_prompt_with_history(chat_id, new_prompt):
+    if chat_id is None:
+        return new_prompt  
+
+    history = get_recent_messages(chat_id, limit=6)
+    if not history:
+        return new_prompt
+
+    context_lines = []
+    for role, content in history:
+        speaker = "User" if role == "user" else "Assistant"
+        context_lines.append(f"{speaker}: {content}")
+
+    context_text = "\n".join(context_lines)
+    return f"{context_text}\nUser: {new_prompt}"
 
 def askOllama(prompt):
     response = requests.post("http://localhost:11434/api/generate", json={
@@ -134,7 +150,8 @@ def post_message(request: ChatRequest, req: Request):
         response = None
         response_detection = {"triggered_rules": [], "rule_count": 0}
     else:
-        response = askOllama(prompt)
+        prompt_with_history = build_prompt_with_history(chat_id, prompt)
+        response = askOllama(prompt_with_history)
         response_detection = detect_response(response)
         if severityCheck(response_detection):
             final_response = "Something went wrong. Please try again."

@@ -137,6 +137,15 @@ def delete_chat(chat_id):
     cur.close()
     conn.close()
 
+def get_recent_messages(chat_id, limit=6):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""SELECT role, content FROM messages WHERE chat_id = %s ORDER BY created_at DESC LIMIT %s;""",(chat_id, limit))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return list(reversed(rows))
+
 
 if __name__ == "__main__":
     init_db()
