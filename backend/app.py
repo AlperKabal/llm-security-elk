@@ -52,7 +52,7 @@ def build_prompt_with_history(chat_id, new_prompt):
     if chat_id is None:
         return new_prompt  
 
-    history = get_recent_messages(chat_id, limit=6)
+    history = get_recent_messages(chat_id, limit=10)
     if not history:
         return new_prompt
 
