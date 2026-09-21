@@ -2,8 +2,6 @@
 
 A defense-in-depth security monitoring system for LLM-powered chat applications, built around an ELK stack. The project detects, logs, alerts on, and (via an AI-assisted second review with conversational memory) re-evaluates prompt injection, jailbreak attempts, and sensitive data leaks in a local LLM chat pipeline, structured around OWASP LLM Top 10 (2026) categories.
 
-Built as a 7-day internship project. Defensive/blue-team focus throughout: no offensive tooling, no real-world exploit payloads.
-
 ---
 
 ## Why This Exists
