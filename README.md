@@ -22,33 +22,33 @@ None of these were hypothetical — they were reproduced against a real local mo
 ## Architecture
 
 ```
-                                   ┌─────────────────────┐
+                                   ┌───────────────────────┐
                                    │   React Frontend      │
                                    │  (chat UI, user mgmt) │
-                                   └──────────┬───────────┘
+                                   └──────────┬────────────┘
                                               │ REST (FastAPI)
                                               ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                          FastAPI Backend                          │
-│                                                                      │
-│  1. Rulebook (regex, rules.yaml)          ─┐                       │
-│  2. Behavioral (rate/length/repetition)    ├─ blocks BEFORE Mistral │
-│  3. Embedding similarity (BGE + jailbreak  ─┘  if high/critical      │
-│     reference set)                                                 │
-│  4. Mistral (Ollama) — with last 10 turns of chat history          │
-│  5. Response-side regex (API keys, PII, script/SQL/shell tags)     │
-│                                                                      │
-└───────┬───────────────────────────────────────────┬────────────────┘
-        │ every interaction, regardless of outcome    │
-        ▼                                              ▼
-┌────────────────────┐                    ┌─────────────────────────┐
+┌───────────────────────────────────────────────────────────────────────┐
+│                          FastAPI Backend                              │
+│                                                                       │
+│  1. Rulebook (regex, rules.yaml)          ─┐                          │
+│  2. Behavioral (rate/length/repetition)    ├─ blocks BEFORE Mistral   │
+│  3. Embedding similarity (BGE + jailbreak  ─┘  if high/critical       │
+│     reference set)                                                    │
+│  4. Mistral (Ollama) — with last 10 turns of chat history             │
+│  5. Response-side regex (API keys, PII, script/SQL/shell tags)        │
+│                                                                       │
+└───────┬───────────────────────────────────────────┬───────────────────┘
+        │ every interaction, regardless of outcome  │
+        ▼                                           ▼
+┌──────────────────────┐                    ┌──────────────────────────┐
 │   PostgreSQL         │                    │   llm_interactions.log   │
 │  (chats, messages,   │                    │        (JSONL)           │
 │   users — app state) │                    └────────────┬─────────────┘
 └──────────────────────┘                                 │ Filebeat
-                                                            ▼
+                                                         ▼
                                                     ┌───────────────┐
-                                                    │   Logstash     │
+                                                    │   Logstash    │
                                                     └───────┬───────┘
                                                             ▼
                                                     ┌───────────────┐
@@ -56,19 +56,19 @@ None of these were hypothetical — they were reproduced against a real local mo
                                                     └───────┬───────┘
                                             ┌───────────────┼────────────────┐
                                             ▼                                ▼
-                                  ┌──────────────────┐          ┌─────────────────────────┐
-                                  │  Kibana Dashboard  │          │   AI Triage Agent         │
-                                  │   (8 panels)        │          │  (Qwen3:8b, every 3 min)  │
-                                  └──────────┬─────────┘          │  re-reviews none/low/     │
-                                             │                     │  medium severity logs,    │
-                                             ▼                     │  WITH prior chat_id turns │
-                                  ┌──────────────────┐          └────────────┬─────────────┘
-                                  │ Kibana Alert Rules │                       │ writes ai_review
-                                  │  (5, per severity   │◄──────────────────────┘  back to ES
+                                  ┌──────────────────┐          ┌──────────────────────────┐
+                                  │  Kibana Dashboard│          │   AI Triage Agent        │
+                                  │   (8 panels)     │          │  (Qwen3:8b, every 3 min) │
+                                  └──────────┬───────┘          │  re-reviews none/low/    │
+                                             │                  │  medium severity logs,   │
+                                             ▼                  │  WITH prior chat_id turns│
+                                  ┌──────────────────────┐      └────────────┬─────────────┘
+                                  │ Kibana Alert Rules   │                   │ writes ai_review
+                                  │  (5, per severity    │◄──────────────────┘  back to ES
                                   │  tier + AI escalate) │
-                                  └──────────┬─────────┘
+                                  └──────────┬───────────┘
                                              ▼
-                                  ┌──────────────────┐
+                                  ┌────────────────────┐
                                   │  Slack (5 channels)│
                                   └────────────────────┘
 ```
