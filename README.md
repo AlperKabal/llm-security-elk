@@ -57,10 +57,10 @@ None of these were hypothetical — they were reproduced against a real local mo
                                             ┌───────────────┼────────────────┐
                                             ▼                                ▼
                                   ┌──────────────────┐          ┌──────────────────────────┐
-                                  │  Kibana Dashboard│          │   AI Triage Agent        │
-                                  │   (8 panels)     │          │  (Qwen3:8b, every 3 min) │
-                                  └──────────┬───────┘          │  re-reviews none/low/    │
+                                  │ Kibana Dashboard │          │   AI Triage Agent        │                            
+                                  └──────────┬───────┘          │  (Qwen3:8b, every 3 min) │
                                              │                  │  medium severity logs,   │
+                                                                │  re-reviews none/low/    │
                                              ▼                  │  WITH prior chat_id turns│
                                   ┌──────────────────────┐      └────────────┬─────────────┘
                                   │ Kibana Alert Rules   │                   │ writes ai_review
