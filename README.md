@@ -52,7 +52,7 @@ None of these were hypothetical — they were reproduced against a real local mo
                                                     └───────┬───────┘
                                                             ▼
                                                     ┌───────────────┐
-                                                    │ Elasticsearch  │
+                                                    │ Elasticsearch │
                                                     └───────┬───────┘
                                             ┌───────────────┼────────────────┐
                                             ▼                                ▼
