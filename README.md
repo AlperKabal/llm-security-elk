@@ -33,7 +33,7 @@ None of these were hypothetical — they were reproduced against a real local mo
 │                                                                       │
 │  1. Rulebook (regex, rules.yaml)          ─┐                          │
 │  2. Behavioral (rate/length/repetition)    ├─ blocks BEFORE Mistral   │
-│  3. Embedding similarity (BGE + jailbreak ─┘  if high/critical       │
+│  3. Embedding similarity (BGE + jailbreak ─┘  if high/critical        │
 │     reference set)                                                    │
 │  4. Mistral (Ollama) — with last 10 turns of chat history             │
 │  5. Response-side regex (API keys, PII, script/SQL/shell tags)        │
